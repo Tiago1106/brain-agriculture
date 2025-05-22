@@ -1,6 +1,6 @@
 "use client"
 
-import { useForm, useFieldArray, Control, FieldErrors } from "react-hook-form"
+import { useForm, useFieldArray, Control, FieldErrors, Controller } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,8 @@ import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { CircleArrowLeft } from "lucide-react"
+import { BrazilianStates } from "@/lib/enumStates"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const schema = z.object({
   name: z.string().min(3, "Nome da fazenda obrigatório"),
@@ -87,85 +89,101 @@ export function FarmForm() {
       <Card className="p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-          <Label htmlFor="name">Nome da Fazenda</Label>
-          <Input id="name" {...register("name")} />
-          {errors.name && <p className="text-red-600 text-sm">{errors.name.message}</p>}
-        </div>
+            <Label htmlFor="name">Nome da Fazenda</Label>
+            <Input id="name" {...register("name")} />
+            {errors.name && <p className="text-red-600 text-sm">{errors.name.message}</p>}
+          </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="city">Cidade</Label>
-            <Input id="city" {...register("city")} />
-            {errors.city && <p className="text-red-600 text-sm">{errors.city.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="state">Estado</Label>
-            <Input id="state" {...register("state")} />
-            {errors.state && <p className="text-red-600 text-sm">{errors.state.message}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="totalArea">Área Total (ha)</Label>
-            <Input type="number" step="0.01" id="totalArea" {...register("totalArea", { valueAsNumber: true })} />
-            {errors.totalArea && <p className="text-red-600 text-sm">{errors.totalArea.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="agriculturalArea">Área Agricultável (ha)</Label>
-            <Input type="number" step="0.01" id="agriculturalArea" {...register("agriculturalArea", { valueAsNumber: true })} />
-            {errors.agriculturalArea && <p className="text-red-600 text-sm">{errors.agriculturalArea.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="vegetationArea">Área de Vegetação (ha)</Label>
-            <Input type="number" step="0.01" id="vegetationArea" {...register("vegetationArea", { valueAsNumber: true })} />
-            {errors.vegetationArea && <p className="text-red-600 text-sm">{errors.vegetationArea.message}</p>}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Safras</Label>
-          {harvestFields.map((harvest, harvestIndex) => (
-            <div key={harvest.id} className="mb-4 border rounded p-4 space-y-3 bg-gray-50">
-              <div className="flex justify-between items-center">
-                <div className="flex-1">
-                  <Label htmlFor={`harvests.${harvestIndex}.year`}>Ano da Safra</Label>
-                  <Input
-                    id={`harvests.${harvestIndex}.year`}
-                    {...register(`harvests.${harvestIndex}.year` as const)}
-                  />
-                  {errors.harvests?.[harvestIndex]?.year && (
-                    <p className="text-red-600 text-sm">{errors.harvests[harvestIndex]?.year?.message}</p>
-                  )}
-                </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  className="mt-6 ml-4"
-                  onClick={() => removeHarvest(harvestIndex)}
-                >
-                  Remover Safra
-                </Button>
-              </div>
-
-              <HarvestCrops
-                control={control}
-                harvestIndex={harvestIndex}
-                errors={errors}
-              />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">Cidade</Label>
+              <Input id="city" {...register("city")} />
+              {errors.city && <p className="text-red-600 text-sm">{errors.city.message}</p>}
             </div>
-          ))}
+            <div className="space-y-2">
+              <Label htmlFor="state">Estado</Label>
+              <Controller
+                name="state"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value} >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o estado" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {Object.entries(BrazilianStates).map(([abbr, name]) => (
+                        <SelectItem key={abbr} value={abbr}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.state && <p className="text-red-600 text-sm">{errors.state.message}</p>}
+            </div>
+          </div>
 
-          <Button type="button" onClick={() => appendHarvest({ year: "", crops: [{ id: nanoid(), name: "" }] })}>
-            Adicionar Safra
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="totalArea">Área Total (ha)</Label>
+              <Input type="number" step="0.01" id="totalArea" {...register("totalArea", { valueAsNumber: true })} />
+              {errors.totalArea && <p className="text-red-600 text-sm">{errors.totalArea.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="agriculturalArea">Área Agricultável (ha)</Label>
+              <Input type="number" step="0.01" id="agriculturalArea" {...register("agriculturalArea", { valueAsNumber: true })} />
+              {errors.agriculturalArea && <p className="text-red-600 text-sm">{errors.agriculturalArea.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="vegetationArea">Área de Vegetação (ha)</Label>
+              <Input type="number" step="0.01" id="vegetationArea" {...register("vegetationArea", { valueAsNumber: true })} />
+              {errors.vegetationArea && <p className="text-red-600 text-sm">{errors.vegetationArea.message}</p>}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Safras</Label>
+            {harvestFields.map((harvest, harvestIndex) => (
+              <div key={harvest.id} className="mb-4 border rounded p-4 space-y-3 bg-gray-50">
+                <div className="flex justify-between items-end gap-2">
+                  <div className="flex-1 flex flex-col gap-2">
+                    <Label htmlFor={`harvests.${harvestIndex}.year`}>Ano da Safra</Label>
+                    <Input
+                      id={`harvests.${harvestIndex}.year`}
+                      {...register(`harvests.${harvestIndex}.year` as const)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => removeHarvest(harvestIndex)}
+                  >
+                    Remover Safra
+                  </Button>
+                </div>
+                {errors.harvests?.[harvestIndex]?.year && (
+                  <p className="text-red-600 text-sm">{errors.harvests[harvestIndex]?.year?.message}</p>
+                )}
+
+                <HarvestCrops
+                  control={control}
+                  harvestIndex={harvestIndex}
+                  errors={errors}
+                />
+              </div>
+            ))}
+
+            <Button type="button" onClick={() => appendHarvest({ year: "", crops: [{ id: nanoid(), name: "" }] })}>
+              Adicionar Safra
+            </Button>
+          </div>
+
+          <Button type="submit" className="w-full mt-6">
+            Cadastrar Fazenda
           </Button>
-        </div>
-
-        <Button type="submit" className="w-full mt-6">
-          Cadastrar Fazenda
-        </Button>
-      </form>
-    </Card>
+        </form>
+      </Card>
     </>
   )
 }
