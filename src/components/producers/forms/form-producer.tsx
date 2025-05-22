@@ -1,77 +1,121 @@
-// components/forms/ProducerForm.tsx
 "use client"
 
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useProducerStore } from "@/stores/useProducerStore"
-import { cpf, cnpj } from 'cpf-cnpj-validator'
+import { useFarmStore } from "@/stores/useFarmStore"
+import { cpf, cnpj } from "cpf-cnpj-validator"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { MaskDocument } from "@/lib/masks"
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-const producers = useProducerStore.getState().producers
+import { MultiSelect } from "@/components/ui/multi-select"
 
 const schema = z.object({
   name: z.string().min(3, "Nome obrigatório"),
-  document: z.string().refine((val) => cpf.isValid(val) || cnpj.isValid(val), {
-    message: "CPF ou CNPJ inválido",
-  }).refine((val) => {
-    const alreadyExists = producers.some((p) => p.document === val)
-    return !alreadyExists
-  }, {
-    message: "CPF ou CNPJ já cadastrado",
-  }),
+  document: z
+    .string()
+    .refine((val) => cpf.isValid(val) || cnpj.isValid(val), {
+      message: "CPF ou CNPJ inválido",
+    })
+    .refine((val) => {
+      const unmasked = val.replace(/\D/g, "")
+      const exists = useProducerStore
+        .getState()
+        .producers.some((p) => p.document.replace(/\D/g, "") === unmasked)
+      return !exists
+    }, {
+      message: "CPF ou CNPJ já cadastrado",
+    }),
+  farms: z.array(z.string()).optional(),
 })
 
 type FormValues = z.infer<typeof schema>
 
 export function ProducerForm() {
   const { addProducer } = useProducerStore()
+  const { farms } = useFarmStore()
   const router = useRouter()
 
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
+    // setValue,
+    // watch,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      name: "",
+      document: "",
+      farms: [],
+    },
   })
 
-  const [document, setDocument] = useState<string>('')
+  // const selectedFarms = watch("farms")
 
   const onSubmit = (data: FormValues) => {
-    addProducer({ ...data, farms: [] })
+    const selectedFarmObjects = farms.filter(f => data.farms?.includes(f.id)) || []
+    addProducer({
+      name: data.name,
+      document: data.document,
+      farms: selectedFarmObjects,
+    })
     toast.success("Produtor cadastrado com sucesso!")
     router.push("/producers")
   }
 
   return (
     <Card className="space-y-4 p-6 rounded-xl shadow">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nome do Produtor</Label>
           <Input id="name" {...register("name")} />
-          {errors.name && (
-            <p className="text-red-500 text-sm">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="document">Documento</Label>
-          <Input id="document" {...register("document")} value={MaskDocument(document)} maxLength={18} onChange={(e) => {
-            setDocument(e.target.value)
-          }} />
-          {errors.document && (
-            <p className="text-red-500 text-sm">{errors.document.message}</p>
-          )}
+          <Controller
+            control={control}
+            name="document"
+            render={({ field }) => (
+              <Input
+                id="document"
+                value={MaskDocument(field.value)}
+                onChange={(e) => field.onChange(e.target.value)}
+                maxLength={18}
+              />
+            )}
+          />
+          {errors.document && <p className="text-red-500 text-sm">{errors.document.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label>Fazendas Associadas (opcional)</Label>
+          <Controller
+            control={control}
+            name="farms"
+            render={({ field }) => (
+              <MultiSelect
+                options={farms.map(farm => ({
+                  label: farm.name,
+                  value: farm.id
+                }))}
+                defaultValue={field.value}
+                onValueChange={(values) => field.onChange(values)}
+                placeholder="Selecione as fazendas"
+                variant="inverted"
+                animation={2}
+                maxCount={3}
+              />
+            )}
+          />
         </div>
 
         <Button type="submit" className="w-full">
