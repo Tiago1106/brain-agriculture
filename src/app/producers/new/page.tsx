@@ -1,7 +1,7 @@
+import { ProducerForm } from "@/components/producers/forms/form-producer";
+
 export default function NewProducer() {
   return (
-    <div>
-      <h1>New Producer</h1>
-    </div>
+    <ProducerForm />
   );
 }

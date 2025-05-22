@@ -1,7 +1,7 @@
+import { FarmForm } from "@/components/farms/forms/form-farm";
+
 export default function NewFarm() {
   return (
-    <div>
-      <h1>New Farm</h1>
-    </div>
+    <FarmForm />
   );
 }

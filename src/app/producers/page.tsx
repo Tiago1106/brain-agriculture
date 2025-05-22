@@ -1,7 +1,7 @@
+import PageProducers from "@/components/producers/page-producers";
+
 export default function Producers() {
   return (
-    <div>
-      <h1>Producers</h1>
-    </div>
-  );
+    <PageProducers />
+  )
 }
