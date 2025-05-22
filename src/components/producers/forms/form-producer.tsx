@@ -14,6 +14,7 @@ import { MaskDocument } from "@/lib/masks"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { MultiSelect } from "@/components/ui/multi-select"
+import { CircleArrowLeft } from "lucide-react"
 
 const schema = z.object({
   name: z.string().min(3, "Nome obrigatório"),
@@ -71,57 +72,64 @@ export function ProducerForm() {
   }
 
   return (
-    <Card className="space-y-4 p-6 rounded-xl shadow">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nome do Produtor</Label>
-          <Input id="name" {...register("name")} />
-          {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
-        </div>
+    <>
+      <div className="flex items-center gap-2">
+        <CircleArrowLeft className="w-6 h-6 cursor-pointer" onClick={() => router.push('/producers')} />
+        <h1 className="text-2xl font-bold">Cadastrar Produtor</h1>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="document">Documento</Label>
-          <Controller
-            control={control}
-            name="document"
-            render={({ field }) => (
-              <Input
-                id="document"
-                value={MaskDocument(field.value)}
-                onChange={(e) => field.onChange(e.target.value)}
-                maxLength={18}
-              />
-            )}
-          />
-          {errors.document && <p className="text-red-500 text-sm">{errors.document.message}</p>}
-        </div>
+      <Card className="space-y-4 p-6 rounded-xl shadow">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome do Produtor</Label>
+            <Input id="name" {...register("name")} />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+          </div>
 
-        <div className="space-y-2">
-          <Label>Fazendas Associadas (opcional)</Label>
-          <Controller
-            control={control}
-            name="farms"
-            render={({ field }) => (
-              <MultiSelect
-                options={farms.map(farm => ({
-                  label: farm.name,
-                  value: farm.id
-                }))}
-                defaultValue={field.value}
-                onValueChange={(values) => field.onChange(values)}
-                placeholder="Selecione as fazendas"
-                variant="inverted"
-                animation={2}
-                maxCount={3}
-              />
-            )}
-          />
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="document">Documento</Label>
+            <Controller
+              control={control}
+              name="document"
+              render={({ field }) => (
+                <Input
+                  id="document"
+                  value={MaskDocument(field.value)}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  maxLength={18}
+                />
+              )}
+            />
+            {errors.document && <p className="text-red-500 text-sm">{errors.document.message}</p>}
+          </div>
 
-        <Button type="submit" className="w-full">
-          Cadastrar produtor
-        </Button>
-      </form>
-    </Card>
+          <div className="space-y-2">
+            <Label>Fazendas Associadas (opcional)</Label>
+            <Controller
+              control={control}
+              name="farms"
+              render={({ field }) => (
+                <MultiSelect
+                  options={farms.map(farm => ({
+                    label: farm.name,
+                    value: farm.id
+                  }))}
+                  defaultValue={field.value}
+                  onValueChange={(values) => field.onChange(values)}
+                  placeholder="Selecione as fazendas"
+                  variant="inverted"
+                  animation={2}
+                  maxCount={3}
+                />
+              )}
+            />
+          </div>
+
+          <Button type="submit" className="w-full">
+            Cadastrar produtor
+          </Button>
+        </form>
+      </Card>
+    </>
   )
 }

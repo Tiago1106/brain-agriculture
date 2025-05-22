@@ -11,6 +11,7 @@ import { nanoid } from "nanoid"
 import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { CircleArrowLeft } from "lucide-react"
 
 const schema = z.object({
   name: z.string().min(3, "Nome da fazenda obrigatório"),
@@ -78,9 +79,14 @@ export function FarmForm() {
   }
 
   return (
-    <Card className="p-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
+    <>
+      <div className="flex items-center gap-2">
+        <CircleArrowLeft className="w-6 h-6 cursor-pointer" onClick={() => router.push('/farm')} />
+        <h1 className="text-2xl font-bold">Cadastrar Fazenda</h1>
+      </div>
+      <Card className="p-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
           <Label htmlFor="name">Nome da Fazenda</Label>
           <Input id="name" {...register("name")} />
           {errors.name && <p className="text-red-600 text-sm">{errors.name.message}</p>}
@@ -160,6 +166,7 @@ export function FarmForm() {
         </Button>
       </form>
     </Card>
+    </>
   )
 }
 
