@@ -1,10 +1,11 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Trash2 } from "lucide-react";
-import { Button } from "../ui/button";
-import { TableCell, TableHead, TableHeader, TableRow, TableBody, Table } from "../ui/table";
-import { Skeleton } from "../ui/skeleton";
 import { useState, Fragment } from "react";
-import { FarmForm } from "./forms/form-farm";
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { TableCell, TableHead, TableHeader, TableRow, TableBody, Table } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FarmForm } from "@/components/farms/forms/form-farm";
+
 import { useFarmStore } from "@/stores/useFarmStore";
 
 export function TableFarms() {

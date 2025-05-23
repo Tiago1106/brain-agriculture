@@ -2,8 +2,8 @@
 
 import { useFarmStore } from '@/stores/useFarmStore'
 
-import { TableFarms } from './table-farms'
-import { FarmForm } from './forms/form-farm'
+import { TableFarms } from '@/components/farms/table-farms'
+import { FarmForm } from '@/components/farms/forms/form-farm'
 
 export default function FarmsPage() {
   const { farms } = useFarmStore()

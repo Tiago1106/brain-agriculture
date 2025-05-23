@@ -1,4 +1,4 @@
-export const MaskDocument = (e: string) => {
+export const MaskDocument = (e: string): string => {
   let value = e.replace(/\D/g, "")
 
   if (value.length <= 11) {

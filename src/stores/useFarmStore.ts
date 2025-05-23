@@ -2,27 +2,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { nanoid } from "nanoid"
 
-export type Crop = {
-  id: string
-  name: string
-}
-
-export type Harvest = {
-  id: string
-  year: string
-  crops: Crop[]
-}
-
-export type Farm = {
-  id: string
-  name: string
-  city: string
-  state: string
-  totalArea: number
-  agriculturalArea: number
-  vegetationArea: number
-  harvests: Harvest[]
-}
+import { Farm } from "@/types/farm"
 
 type FarmStore = {
   farms: Farm[]

@@ -1,11 +1,12 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Trash2 } from "lucide-react";
-import { Button } from "../ui/button";
-import { TableCell, TableHead, TableHeader, TableRow, TableBody, Table } from "../ui/table";
-import { useProducerStore } from "@/stores/useProducerStore";
-import { Skeleton } from "../ui/skeleton";
 import { Fragment, useState } from "react";
-import { ProducerForm } from "./forms/form-producer";
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { TableCell, TableHead, TableHeader, TableRow, TableBody, Table } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ProducerForm } from "@/components/producers/forms/form-producer";
+
+import { useProducerStore } from "@/stores/useProducerStore";
 
 export function TableProducers() {
   const [expandedIds, setExpandedIds] = useState<string[]>([]);

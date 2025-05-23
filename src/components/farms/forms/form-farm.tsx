@@ -1,53 +1,28 @@
 "use client"
 
-import { useForm, useFieldArray, Control, FieldErrors, Controller } from "react-hook-form"
+import { useEffect, useState } from "react"
+import { Pencil, Trash } from "lucide-react"
+import { nanoid } from "nanoid"
+
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm, useFieldArray, Control, FieldErrors, Controller } from "react-hook-form"
+
+import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Farm, useFarmStore } from "@/stores/useFarmStore"
-import { nanoid } from "nanoid"
-import { toast } from "sonner"
-import { BrazilianStates } from "@/lib/enumStates"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Sheet } from "@/components/ui/sheet"
-import { Pencil, Trash } from "lucide-react"
-import { useEffect, useState } from "react"
 
-const schema = z.object({
-  name: z.string().min(3, "Nome da fazenda obrigatório"),
-  city: z.string().min(2, "Cidade obrigatória"),
-  state: z.string().min(2, "Estado obrigatório"),
-  totalArea: z.number().min(0.1, "Área total deve ser maior que zero"),
-  agriculturalArea: z.number().min(0, "Área agricultável não pode ser negativa"),
-  vegetationArea: z.number().min(0, "Área de vegetação não pode ser negativa"),
-  harvests: z
-    .array(
-      z.object({
-        id: z.string(),
-        year: z.string().min(4, "Ano da safra obrigatório").max(4, "Ano da safra inválido"),
-        crops: z
-          .array(
-            z.object({
-              id: z.string(),
-              name: z.string().min(2, "Nome da cultura obrigatório"),
-            })
-          )
-          .optional(),
-      })
-    )
-    .min(1, "Cadastre ao menos uma safra"),
-}).refine(
-  (data) => data.agriculturalArea + data.vegetationArea <= data.totalArea,
-  {
-    message: "A soma da área agricultável e vegetação deve ser menor ou igual à área total",
-    path: ["agriculturalArea"],
-  }
-)
+import { useFarmStore } from "@/stores/useFarmStore"
 
-type FormValues = z.infer<typeof schema>
+import { BrazilianStates } from "@/lib/enumStates"
+import { schemaFarm } from "@/lib/validations"
+import { Farm } from "@/types/farm"
+
+type FormValues = z.infer<typeof schemaFarm>
 
 const defaultValues: FormValues = {
   name: "",
@@ -74,7 +49,7 @@ export function FarmForm({ isEdit }: FarmFormProps) {
     formState: { errors },
     reset,
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schemaFarm),
     defaultValues: isEdit || defaultValues,
   })
 

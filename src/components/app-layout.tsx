@@ -1,8 +1,9 @@
-import { SidebarInset } from "./ui/sidebar";
-import { SidebarProvider } from "./ui/sidebar";
-import { AppSidebar } from "./app-sidebar";
-import { SiteHeader } from "./site-header";
 import { Toaster } from "sonner";
+
+import { SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SiteHeader } from "@/components/site-header";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,42 +1,25 @@
 "use client"
 
-import { useForm, Controller } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Producer, useProducerStore } from "@/stores/useProducerStore"
-import { useFarmStore } from "@/stores/useFarmStore"
-import { cpf, cnpj } from "cpf-cnpj-validator"
-import { Label } from "@/components/ui/label"
-import { MaskDocument } from "@/lib/masks"
-import { toast } from "sonner"
-import { MultiSelect } from "@/components/ui/multi-select"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useEffect, useState } from "react"
 import { Pencil } from "lucide-react"
 
-export const createProducerSchema = (isEdit?: { id: string }) =>
-  z.object({
-    name: z.string().min(3, "Nome obrigatório"),
-    document: z
-      .string()
-      .refine((val) => cpf.isValid(val) || cnpj.isValid(val), {
-        message: "CPF ou CNPJ inválido",
-      })
-      .refine((val) => {
-        const unmasked = val.replace(/\D/g, "")
-        const exists = useProducerStore
-          .getState()
-          .producers.some((p) =>
-            p.document.replace(/\D/g, "") === unmasked && p.id !== isEdit?.id
-          )
-        return !exists
-      }, {
-        message: "CPF ou CNPJ já cadastrado",
-      }),
-    farms: z.array(z.string()).optional(),
-  })
+import { useForm, Controller } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { MultiSelect } from "@/components/ui/multi-select"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+
+import { useProducerStore } from "@/stores/useProducerStore"
+import { useFarmStore } from "@/stores/useFarmStore"
+
+import { MaskDocument } from "@/lib/masks"
+import { createProducerSchema } from "@/lib/validations"
+import { Producer } from "@/types/producer"
 
 type FormValues = z.infer<ReturnType<typeof createProducerSchema>>
 
@@ -51,10 +34,10 @@ const defaultValues: FormValues = {
 }
 
 export function ProducerForm({ isEdit }: ProducerFormProps) {
-  const { addProducer, updateProducer } = useProducerStore()
+  const { addProducer, updateProducer, producers } = useProducerStore()
   const { farms } = useFarmStore()
-  const [open, setOpen] = useState<boolean>(false)
 
+  const [open, setOpen] = useState<boolean>(false)
 
   const {
     control,
@@ -63,15 +46,13 @@ export function ProducerForm({ isEdit }: ProducerFormProps) {
     formState: { errors },
     reset,
   } = useForm<FormValues>({
-    resolver: zodResolver(createProducerSchema(isEdit)),
+    resolver: zodResolver(createProducerSchema(isEdit, producers)),
     defaultValues: isEdit ? {
       name: isEdit.name,
       document: isEdit.document,
       farms: isEdit.farms?.map(farm => farm.id)
     } : defaultValues,
   })
-
-  // const selectedFarms = watch("farms")
 
   const onSubmit = (data: FormValues) => {
     const selectedFarmObjects = farms.filter(f => data.farms?.includes(f.id)) || []

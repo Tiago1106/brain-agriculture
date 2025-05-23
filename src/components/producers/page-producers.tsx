@@ -2,8 +2,8 @@
 
 import { useProducerStore } from '@/stores/useProducerStore'
 
-import { TableProducers } from './table-producers'
-import { ProducerForm } from './forms/form-producer'
+import { TableProducers } from '@/components/producers/table-producers'
+import { ProducerForm } from '@/components/producers/forms/form-producer'
 
 export default function ProducersPage() {
   const { producers } = useProducerStore()
