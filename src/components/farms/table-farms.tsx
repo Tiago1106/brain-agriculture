@@ -107,20 +107,20 @@ export function TableFarms() {
                           <TableHeader>
                             <TableRow>
                               <TableHead>Safra</TableHead>
-                              <TableHead>Produto</TableHead>
+                              <TableHead>Culturas</TableHead>
                               <TableHead>Área Plantada</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {farm.harvests?.map(season => (
-                              season.crops.map(crop => (
+                            {farm.harvests?.length && farm.harvests?.length > 0 ? (
+                              farm.harvests?.map(season => (
                                 <TableRow key={season.id}>
                                   <TableCell>{season.year}</TableCell>
-                                  <TableCell>{crop.name}</TableCell>
-                                  <TableCell>{farm.agriculturalArea ?? "N/A"}</TableCell>
+                                  <TableCell>{season.crops.map(crop => crop.name).join(", ") || "Sem culturas"}</TableCell>
+                                  <TableCell>{season.crops.length > 0 ? farm.agriculturalArea : "0"}</TableCell>
                                 </TableRow>
                               ))
-                            )) ?? (
+                            ) : (
                               <TableRow>
                                 <TableCell colSpan={6} className="text-center italic text-gray-500">
                                   Nenhuma safra cadastrada.

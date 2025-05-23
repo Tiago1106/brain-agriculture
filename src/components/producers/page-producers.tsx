@@ -6,7 +6,7 @@ import { TableProducers } from './table-producers'
 import { ProducerForm } from './forms/form-producer'
 
 export default function ProducersPage() {
-  const { producers, deleteProducer, isHydrated } = useProducerStore()
+  const { producers } = useProducerStore()
 
   return (
     <>
@@ -18,7 +18,7 @@ export default function ProducersPage() {
       {producers.length === 0 ? (
         <p className="text-muted-foreground">Nenhum produtor cadastrado.</p>
       ) : (
-        <TableProducers producers={producers} deleteProducer={deleteProducer} isHydrated={isHydrated} />
+        <TableProducers />
       )}
     </>
   )

@@ -1,21 +1,15 @@
-import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { TableCell, TableHead, TableHeader, TableRow, TableBody, Table } from "../ui/table";
-import { Producer } from "@/stores/useProducerStore";
-import { useRouter } from "next/navigation";
+import { useProducerStore } from "@/stores/useProducerStore";
 import { Skeleton } from "../ui/skeleton";
 import { Fragment, useState } from "react";
+import { ProducerForm } from "./forms/form-producer";
 
-interface TableProducersProps {
-  producers: Producer[];
-  deleteProducer: (id: string) => void;
-  isHydrated: boolean;
-}
-
-export function TableProducers({ producers, deleteProducer, isHydrated }: TableProducersProps) {
-  const router = useRouter();
+export function TableProducers() {
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const { producers, deleteProducer, isHydrated } = useProducerStore()
 
   function toggleExpand(id: string) {
     setExpandedIds((current) =>
@@ -64,7 +58,7 @@ export function TableProducers({ producers, deleteProducer, isHydrated }: TableP
                 <Fragment key={producer.id}>
                   <TableRow>
                     <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => toggleExpand(producer.id)} disabled={producer.farms?.length === 0}>
+                      <Button variant="ghost" size="sm" onClick={() => toggleExpand(producer.id)}>
                         {isExpanded ? (
                           <ChevronUp className="w-5 h-5" />
                         ) : (
@@ -76,21 +70,13 @@ export function TableProducers({ producers, deleteProducer, isHydrated }: TableP
                     <TableCell>{producer.document}</TableCell>
                     <TableCell>{producer.farms?.length ?? 0}</TableCell>
                     <TableCell className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push(`/producers/${producer.id}/edit`)}
-                      >
-                        <Pencil className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
+                      <ProducerForm isEdit={producer} />
                       <Button
                         variant="destructive"
-                        size="sm"
+                        size="icon"
                         onClick={() => deleteProducer(producer.id)}
                       >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Excluir
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -106,12 +92,14 @@ export function TableProducers({ producers, deleteProducer, isHydrated }: TableP
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {producer.farms?.map((farm) => (
-                              <TableRow key={farm.id}>
-                                <TableCell>{farm.name}</TableCell>
-                                <TableCell>{farm.totalArea ?? "N/A"} ha</TableCell>
-                              </TableRow>
-                            )) ?? (
+                            {producer.farms?.length && producer.farms?.length > 0 ? (
+                              producer.farms?.map((farm) => (
+                                <TableRow key={farm.id}>
+                                  <TableCell>{farm.name}</TableCell>
+                                  <TableCell>{farm.totalArea ?? "N/A"} ha</TableCell>
+                                </TableRow>
+                              ))
+                            ) : (
                               <TableRow>
                                 <TableCell colSpan={2} className="text-center italic text-gray-500">
                                   Nenhuma fazenda cadastrada.

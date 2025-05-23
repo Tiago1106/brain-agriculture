@@ -5,7 +5,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useProducerStore } from "@/stores/useProducerStore"
+import { Producer, useProducerStore } from "@/stores/useProducerStore"
 import { useFarmStore } from "@/stores/useFarmStore"
 import { cpf, cnpj } from "cpf-cnpj-validator"
 import { Label } from "@/components/ui/label"
@@ -13,33 +13,48 @@ import { MaskDocument } from "@/lib/masks"
 import { toast } from "sonner"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { Pencil } from "lucide-react"
 
-const schema = z.object({
-  name: z.string().min(3, "Nome obrigatório"),
-  document: z
-    .string()
-    .refine((val) => cpf.isValid(val) || cnpj.isValid(val), {
-      message: "CPF ou CNPJ inválido",
-    })
-    .refine((val) => {
-      const unmasked = val.replace(/\D/g, "")
-      const exists = useProducerStore
-        .getState()
-        .producers.some((p) => p.document.replace(/\D/g, "") === unmasked)
-      return !exists
-    }, {
-      message: "CPF ou CNPJ já cadastrado",
-    }),
-  farms: z.array(z.string()).optional(),
-})
+export const createProducerSchema = (isEdit?: { id: string }) =>
+  z.object({
+    name: z.string().min(3, "Nome obrigatório"),
+    document: z
+      .string()
+      .refine((val) => cpf.isValid(val) || cnpj.isValid(val), {
+        message: "CPF ou CNPJ inválido",
+      })
+      .refine((val) => {
+        const unmasked = val.replace(/\D/g, "")
+        const exists = useProducerStore
+          .getState()
+          .producers.some((p) =>
+            p.document.replace(/\D/g, "") === unmasked && p.id !== isEdit?.id
+          )
+        return !exists
+      }, {
+        message: "CPF ou CNPJ já cadastrado",
+      }),
+    farms: z.array(z.string()).optional(),
+  })
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<ReturnType<typeof createProducerSchema>>
 
-export function ProducerForm() {
-  const { addProducer } = useProducerStore()
+interface ProducerFormProps {
+  isEdit?: Producer | undefined
+}
+
+const defaultValues: FormValues = {
+  name: "",
+  document: "",
+  farms: [],
+}
+
+export function ProducerForm({ isEdit }: ProducerFormProps) {
+  const { addProducer, updateProducer } = useProducerStore()
   const { farms } = useFarmStore()
   const [open, setOpen] = useState<boolean>(false)
+
 
   const {
     control,
@@ -48,27 +63,45 @@ export function ProducerForm() {
     formState: { errors },
     reset,
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      name: "",
-      document: "",
-      farms: [],
-    },
+    resolver: zodResolver(createProducerSchema(isEdit)),
+    defaultValues: isEdit ? {
+      name: isEdit.name,
+      document: isEdit.document,
+      farms: isEdit.farms?.map(farm => farm.id)
+    } : defaultValues,
   })
 
   // const selectedFarms = watch("farms")
 
   const onSubmit = (data: FormValues) => {
     const selectedFarmObjects = farms.filter(f => data.farms?.includes(f.id)) || []
-    addProducer({
-      name: data.name,
-      document: data.document,
-      farms: selectedFarmObjects,
-    })
-    toast.success("Produtor cadastrado com sucesso!")
+    if (isEdit) {
+      updateProducer({
+        ...isEdit,
+        ...data,
+        farms: selectedFarmObjects,
+      })
+      toast.success("Produtor atualizado com sucesso!")
+    } else {
+      addProducer({
+        name: data.name,
+        document: data.document,
+        farms: selectedFarmObjects,
+      })
+      toast.success("Produtor cadastrado com sucesso!")
+    }
+
     setOpen(false)
     reset()
   }
+
+  useEffect(() => {
+    reset(isEdit ? {
+      name: isEdit.name,
+      document: isEdit.document,
+      farms: isEdit.farms?.map(farm => farm.id)
+    } : defaultValues)
+  }, [isEdit, reset])
 
   return (
     <Sheet
@@ -78,13 +111,19 @@ export function ProducerForm() {
         setOpen(isOpen)
       }}>
       <SheetTrigger asChild>
-        <Button variant="default">Cadastrar produtor</Button>
+        {isEdit ? (
+          <Button variant="outline" size="icon">
+            <Pencil className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button variant="default">Cadastrar produtor</Button>
+        )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Cadastrar produtor</SheetTitle>
+          <SheetTitle>{isEdit ? "Editar produtor" : "Cadastrar produtor"}</SheetTitle>
           <SheetDescription>
-            Cadastre um novo produtor para começar a gerenciar suas fazendas.
+            {isEdit ? "Edite os dados do produtor" : "Cadastre um novo produtor para começar a gerenciar suas fazendas."}
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
@@ -134,7 +173,7 @@ export function ProducerForm() {
           </div>
 
           <Button type="submit" className="w-full">
-            Cadastrar produtor
+            {isEdit ? "Atualizar produtor" : "Cadastrar produtor"}
           </Button>
         </form>
       </SheetContent>

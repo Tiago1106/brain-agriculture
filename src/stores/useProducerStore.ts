@@ -28,7 +28,7 @@ export type Producer = {
   id: string
   document: string
   name: string
-  farms: Farm[]
+  farms?: Farm[]
 }
 
 type ProducerStore = {
