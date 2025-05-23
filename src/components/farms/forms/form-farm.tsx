@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Farm, useFarmStore } from "@/stores/useFarmStore"
 import { nanoid } from "nanoid"
-import { Card } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { CircleArrowLeft } from "lucide-react"
 import { BrazilianStates } from "@/lib/enumStates"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet } from "@/components/ui/sheet"
+import { Trash } from "lucide-react"
+import { useState } from "react"
 
 const schema = z.object({
   name: z.string().min(3, "Nome da fazenda obrigatório"),
@@ -49,13 +50,14 @@ type FormValues = z.infer<typeof schema>
 
 export function FarmForm() {
   const { addFarm } = useFarmStore()
-  const router = useRouter()
+  const [open, setOpen] = useState<boolean>(false)
 
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -77,17 +79,28 @@ export function FarmForm() {
   const onSubmit = (data: FormValues) => {
     addFarm(data as Omit<Farm, "id">)
     toast.success("Fazenda cadastrada com sucesso!")
-    router.push("/farm")
+    setOpen(false)
+    reset()
   }
 
   return (
-    <>
-      <div className="flex items-center gap-2">
-        <CircleArrowLeft className="w-6 h-6 cursor-pointer" onClick={() => router.push('/farm')} />
-        <h1 className="text-2xl font-bold">Cadastrar Fazenda</h1>
-      </div>
-      <Card className="p-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <Sheet
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) reset()
+        setOpen(isOpen)
+      }}>
+      <SheetTrigger asChild>
+        <Button variant="default">Cadastrar fazenda</Button>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Cadastrar fazenda</SheetTitle>
+          <SheetDescription>
+            Cadastre uma nova fazenda para começar a gerenciar suas safras.
+          </SheetDescription>
+        </SheetHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome da Fazenda</Label>
             <Input id="name" {...register("name")} />
@@ -125,19 +138,19 @@ export function FarmForm() {
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-2 h-[72px] justify-between flex flex-col">
               <Label htmlFor="totalArea">Área Total (ha)</Label>
-              <Input type="number" step="0.01" id="totalArea" {...register("totalArea", { valueAsNumber: true })} />
+              <Input type="number" step="1" id="totalArea" {...register("totalArea", { valueAsNumber: true })} />
               {errors.totalArea && <p className="text-red-600 text-sm">{errors.totalArea.message}</p>}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 h-[72px] justify-between flex flex-col">
               <Label htmlFor="agriculturalArea">Área Agricultável (ha)</Label>
-              <Input type="number" step="0.01" id="agriculturalArea" {...register("agriculturalArea", { valueAsNumber: true })} />
+              <Input type="number" step="1" id="agriculturalArea" {...register("agriculturalArea", { valueAsNumber: true })} />
               {errors.agriculturalArea && <p className="text-red-600 text-sm">{errors.agriculturalArea.message}</p>}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 h-[72px] justify-between flex flex-col">
               <Label htmlFor="vegetationArea">Área de Vegetação (ha)</Label>
-              <Input type="number" step="0.01" id="vegetationArea" {...register("vegetationArea", { valueAsNumber: true })} />
+              <Input type="number" step="1" id="vegetationArea" {...register("vegetationArea", { valueAsNumber: true })} />
               {errors.vegetationArea && <p className="text-red-600 text-sm">{errors.vegetationArea.message}</p>}
             </div>
           </div>
@@ -157,9 +170,10 @@ export function FarmForm() {
                   <Button
                     type="button"
                     variant="destructive"
+                    size="icon"
                     onClick={() => removeHarvest(harvestIndex)}
                   >
-                    Remover Safra
+                    <Trash className="w-4 h-4" />
                   </Button>
                 </div>
                 {errors.harvests?.[harvestIndex]?.year && (
@@ -183,8 +197,8 @@ export function FarmForm() {
             Cadastrar Fazenda
           </Button>
         </form>
-      </Card>
-    </>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -211,9 +225,10 @@ function HarvestCrops({ control, harvestIndex, errors }: HarvestCropsProps) {
           <Button
             type="button"
             variant="destructive"
+            size="icon"
             onClick={() => remove(cropIndex)}
           >
-            Remover
+            <Trash className="w-4 h-4" />
           </Button>
         </div>
       ))}

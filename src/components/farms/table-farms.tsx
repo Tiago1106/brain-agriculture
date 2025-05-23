@@ -16,16 +16,9 @@ interface TableFarmsProps {
 export function TableFarms({ farms, deleteFarm, isHydrated }: TableFarmsProps) {
   const router = useRouter()
   const [expandedFarmIds, setExpandedFarmIds] = useState<string[]>([]);
-  const [expandedSeasonIds, setExpandedSeasonIds] = useState<string[]>([]);
 
   function toggleExpandFarm(id: string) {
     setExpandedFarmIds(current =>
-      current.includes(id) ? current.filter(i => i !== id) : [...current, id]
-    );
-  }
-
-  function toggleExpandSeason(id: string) {
-    setExpandedSeasonIds(current =>
       current.includes(id) ? current.filter(i => i !== id) : [...current, id]
     );
   }
@@ -127,72 +120,27 @@ export function TableFarms({ farms, deleteFarm, isHydrated }: TableFarmsProps) {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="w-10"></TableHead>
                               <TableHead>Safra</TableHead>
+                              <TableHead>Produto</TableHead>
                               <TableHead>Área Plantada</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {farm.harvests?.map(season => {
-                              const isSeasonExpanded = expandedSeasonIds.includes(season.id);
-
-                              return (
-                                <Fragment key={season.id}>
-                                  <TableRow>
-                                    <TableCell>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => toggleExpandSeason(season.id)}
-                                      >
-                                        {isSeasonExpanded ? (
-                                          <ChevronUp className="w-5 h-5" />
-                                        ) : (
-                                          <ChevronDown className="w-5 h-5" />
-                                        )}
-                                      </Button>
-                                    </TableCell>
-                                    <TableCell>{season.year}</TableCell>
-                                    <TableCell>{farm.agriculturalArea ?? "N/A"}</TableCell>
-                                  </TableRow>
-
-                                  {isSeasonExpanded && (
-                                    <TableRow>
-                                      <TableCell colSpan={6}>
-                                        <Table>
-                                          <TableHeader>
-                                            <TableRow>
-                                              <TableHead>Produto</TableHead>
-                                            </TableRow>
-                                          </TableHeader>
-                                          <TableBody>
-                                            {season.crops?.length > 0 ?
-                                              season.crops?.map((product) => (
-                                                <TableRow key={product.id}>
-                                                  <TableCell>{product.name}</TableCell>
-                                                </TableRow>
-                                              ))
-                                              : (
-                                                <TableRow>
-                                                  <TableCell colSpan={4} className=" italic text-gray-500">
-                                                    Nenhum produto cadastrado.
-                                                  </TableCell>
-                                                </TableRow>
-                                              )}
-                                          </TableBody>
-                                        </Table>
-                                      </TableCell>
-                                    </TableRow>
-                                  )}
-                                </Fragment>
-                              );
-                            }) ?? (
-                                <TableRow>
-                                  <TableCell colSpan={6} className="text-center italic text-gray-500">
-                                    Nenhuma safra cadastrada.
-                                  </TableCell>
+                            {farm.harvests?.map(season => (
+                              season.crops.map(crop => (
+                                <TableRow key={season.id}>
+                                  <TableCell>{season.year}</TableCell>
+                                  <TableCell>{crop.name}</TableCell>
+                                  <TableCell>{farm.agriculturalArea ?? "N/A"}</TableCell>
                                 </TableRow>
-                              )}
+                              ))
+                            )) ?? (
+                              <TableRow>
+                                <TableCell colSpan={6} className="text-center italic text-gray-500">
+                                  Nenhuma safra cadastrada.
+                                </TableCell>
+                              </TableRow>
+                            )}
                           </TableBody>
                         </Table>
                       </TableCell>

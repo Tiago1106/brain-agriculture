@@ -9,12 +9,11 @@ import { useProducerStore } from "@/stores/useProducerStore"
 import { useFarmStore } from "@/stores/useFarmStore"
 import { cpf, cnpj } from "cpf-cnpj-validator"
 import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
 import { MaskDocument } from "@/lib/masks"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { MultiSelect } from "@/components/ui/multi-select"
-import { CircleArrowLeft } from "lucide-react"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { useState } from "react"
 
 const schema = z.object({
   name: z.string().min(3, "Nome obrigatório"),
@@ -40,15 +39,14 @@ type FormValues = z.infer<typeof schema>
 export function ProducerForm() {
   const { addProducer } = useProducerStore()
   const { farms } = useFarmStore()
-  const router = useRouter()
+  const [open, setOpen] = useState<boolean>(false)
 
   const {
     control,
     register,
     handleSubmit,
     formState: { errors },
-    // setValue,
-    // watch,
+    reset,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -68,18 +66,28 @@ export function ProducerForm() {
       farms: selectedFarmObjects,
     })
     toast.success("Produtor cadastrado com sucesso!")
-    router.push("/producers")
+    setOpen(false)
+    reset()
   }
 
   return (
-    <>
-      <div className="flex items-center gap-2">
-        <CircleArrowLeft className="w-6 h-6 cursor-pointer" onClick={() => router.push('/producers')} />
-        <h1 className="text-2xl font-bold">Cadastrar Produtor</h1>
-      </div>
-
-      <Card className="space-y-4 p-6 rounded-xl shadow">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <Sheet
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) reset()
+        setOpen(isOpen)
+      }}>
+      <SheetTrigger asChild>
+        <Button variant="default">Cadastrar produtor</Button>
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>Cadastrar produtor</SheetTitle>
+          <SheetDescription>
+            Cadastre um novo produtor para começar a gerenciar suas fazendas.
+          </SheetDescription>
+        </SheetHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome do Produtor</Label>
             <Input id="name" {...register("name")} />
@@ -129,7 +137,7 @@ export function ProducerForm() {
             Cadastrar produtor
           </Button>
         </form>
-      </Card>
-    </>
+      </SheetContent>
+    </Sheet>
   )
 }
