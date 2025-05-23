@@ -1,20 +1,14 @@
-import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { TableCell, TableHead, TableHeader, TableRow, TableBody, Table } from "../ui/table";
-import { Farm } from "@/stores/useProducerStore"; // Supondo que Season = Safra e Product = Produto
-import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
 import { useState, Fragment } from "react";
+import { FarmForm } from "./forms/form-farm";
+import { useFarmStore } from "@/stores/useFarmStore";
 
-interface TableFarmsProps {
-  farms: Farm[]
-  deleteFarm: (id: string) => void
-  isHydrated: boolean
-}
-
-export function TableFarms({ farms, deleteFarm, isHydrated }: TableFarmsProps) {
-  const router = useRouter()
+export function TableFarms() {
+  const { farms, deleteFarm, isHydrated } = useFarmStore()
   const [expandedFarmIds, setExpandedFarmIds] = useState<string[]>([]);
 
   function toggleExpandFarm(id: string) {
@@ -95,21 +89,13 @@ export function TableFarms({ farms, deleteFarm, isHydrated }: TableFarmsProps) {
                     <TableCell>{farm.agriculturalArea}</TableCell>
                     <TableCell>{farm.vegetationArea}</TableCell>
                     <TableCell className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push(`/farms/${farm.id}/edit`)}
-                      >
-                        <Pencil className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
+                      <FarmForm isEdit={farm} />
                       <Button
                         variant="destructive"
-                        size="sm"
+                        size="icon"
                         onClick={() => deleteFarm(farm.id)}
                       >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Excluir
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>
                   </TableRow>

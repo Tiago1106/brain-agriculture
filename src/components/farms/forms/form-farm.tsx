@@ -13,8 +13,8 @@ import { BrazilianStates } from "@/lib/enumStates"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Sheet } from "@/components/ui/sheet"
-import { Trash } from "lucide-react"
-import { useState } from "react"
+import { Pencil, Trash } from "lucide-react"
+import { useEffect, useState } from "react"
 
 const schema = z.object({
   name: z.string().min(3, "Nome da fazenda obrigatório"),
@@ -26,6 +26,7 @@ const schema = z.object({
   harvests: z
     .array(
       z.object({
+        id: z.string(),
         year: z.string().min(4, "Ano da safra obrigatório").max(4, "Ano da safra inválido"),
         crops: z
           .array(
@@ -48,8 +49,22 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-export function FarmForm() {
-  const { addFarm } = useFarmStore()
+const defaultValues: FormValues = {
+  name: "",
+  city: "",
+  state: "",
+  totalArea: 0,
+  agriculturalArea: 0,
+  vegetationArea: 0,
+  harvests: [{ id: "", year: "", crops: [] }]
+}
+
+interface FarmFormProps {
+  isEdit?: Farm | undefined
+}
+
+export function FarmForm({ isEdit }: FarmFormProps) {
+  const { addFarm, updateFarm } = useFarmStore()
   const [open, setOpen] = useState<boolean>(false)
 
   const {
@@ -60,15 +75,7 @@ export function FarmForm() {
     reset,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      name: "",
-      city: "",
-      state: "",
-      totalArea: 0,
-      agriculturalArea: 0,
-      vegetationArea: 0,
-      harvests: [{ year: "", crops: [] }],
-    },
+    defaultValues: isEdit || defaultValues,
   })
 
   const { fields: harvestFields, append: appendHarvest, remove: removeHarvest } = useFieldArray({
@@ -77,11 +84,25 @@ export function FarmForm() {
   })
 
   const onSubmit = (data: FormValues) => {
-    addFarm(data as Omit<Farm, "id">)
-    toast.success("Fazenda cadastrada com sucesso!")
+    if (isEdit) {
+      const newFarm = {
+        ...isEdit,
+        ...data,
+      }
+      updateFarm(newFarm as Farm)
+      toast.success("Fazenda atualizada com sucesso!")
+    } else {
+      addFarm(data as Omit<Farm, "id">)
+      toast.success("Fazenda cadastrada com sucesso!")
+    }
+
     setOpen(false)
     reset()
   }
+
+  useEffect(() => {
+    reset(isEdit || defaultValues)
+  }, [isEdit, reset])
 
   return (
     <Sheet
@@ -91,13 +112,19 @@ export function FarmForm() {
         setOpen(isOpen)
       }}>
       <SheetTrigger asChild>
-        <Button variant="default">Cadastrar fazenda</Button>
+        {isEdit ? (
+          <Button variant="outline" size="icon">
+            <Pencil className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button variant="default">Cadastrar fazenda</Button>
+        )}
       </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Cadastrar fazenda</SheetTitle>
+          <SheetTitle>{isEdit ? "Editar fazenda" : "Cadastrar fazenda"}</SheetTitle>
           <SheetDescription>
-            Cadastre uma nova fazenda para começar a gerenciar suas safras.
+            {isEdit ? "Edite os dados da fazenda" : "Cadastre uma nova fazenda para começar a gerenciar suas safras."}
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
@@ -188,13 +215,13 @@ export function FarmForm() {
               </div>
             ))}
 
-            <Button type="button" onClick={() => appendHarvest({ year: "", crops: [{ id: nanoid(), name: "" }] })}>
+            <Button type="button" onClick={() => appendHarvest({ id: nanoid(), year: "", crops: [{ id: nanoid(), name: "" }] })}>
               Adicionar Safra
             </Button>
           </div>
 
           <Button type="submit" className="w-full mt-6">
-            Cadastrar Fazenda
+            {isEdit ? "Atualizar Fazenda" : "Cadastrar Fazenda"}
           </Button>
         </form>
       </SheetContent>

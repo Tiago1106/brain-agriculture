@@ -6,7 +6,7 @@ import { TableFarms } from './table-farms'
 import { FarmForm } from './forms/form-farm'
 
 export default function FarmsPage() {
-  const { farms, deleteFarm, isHydrated } = useFarmStore()
+  const { farms } = useFarmStore()
 
   return (
     <>
@@ -18,7 +18,7 @@ export default function FarmsPage() {
       {farms.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma fazenda cadastrada.</p>
       ) : (
-        <TableFarms farms={farms} deleteFarm={deleteFarm} isHydrated={isHydrated} />
+        <TableFarms />
       )}
     </>
   )

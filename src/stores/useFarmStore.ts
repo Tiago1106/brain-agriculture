@@ -96,7 +96,7 @@ export const useFarmStore = create<FarmStore>()(
       setHydrated: (value) => set({ isHydrated: value }),
       addFarm: (farm) =>
         set((state) => ({
-          farms: [...state.farms, { ...farm, id: nanoid() }],
+          farms: [...state.farms, { ...farm, id: nanoid(), harvests: farm.harvests.map(harvest => ({ ...harvest, id: nanoid() })) }],
         })),
       updateFarm: (updatedFarm) =>
         set((state) => ({
