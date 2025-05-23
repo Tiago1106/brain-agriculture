@@ -122,7 +122,7 @@ export function FarmForm({ isEdit }: FarmFormProps) {
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value} >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger id="state" className="w-full">
                       <SelectValue placeholder="Selecione o estado" />
                     </SelectTrigger>
                     <SelectContent className="max-h-60 overflow-y-auto">
