@@ -10,7 +10,7 @@ O sistema é projetado para ser ágil, escalável e fácil de usar, com funciona
 
 Você pode acessar o projeto em produção através do link abaixo:
 
-🔗 [Dashboard de Gestão Rural]()
+🔗 [Dashboard de Gestão Rural](https://brain-agriculture-omega.vercel.app/)
 
 ## 📸 Screenshot
 
