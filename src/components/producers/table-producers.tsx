@@ -88,21 +88,21 @@ export function TableProducers() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Fazenda</TableHead>
-                              <TableHead>Área</TableHead>
+                              <TableHead className="w-1/2 max-w-[300px]">Fazenda</TableHead>
+                              <TableHead className="text-left">Área</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {producer.farms?.length && producer.farms?.length > 0 ? (
                               producer.farms?.map((farm) => (
                                 <TableRow key={farm.id}>
-                                  <TableCell>{farm.name}</TableCell>
-                                  <TableCell>{farm.totalArea ?? "N/A"} ha</TableCell>
+                                  <TableCell className="w-1/2 max-w-[300px] truncate">{farm.name}</TableCell>
+                                  <TableCell className="text-left">{farm.totalArea ?? "N/A"} ha</TableCell>
                                 </TableRow>
                               ))
                             ) : (
                               <TableRow>
-                                <TableCell colSpan={2} className="text-center italic text-gray-500">
+                                <TableCell colSpan={5} className="text-center italic text-gray-500">
                                   Nenhuma fazenda cadastrada.
                                 </TableCell>
                               </TableRow>

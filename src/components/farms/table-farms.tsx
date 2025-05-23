@@ -107,18 +107,18 @@ export function TableFarms() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Safra</TableHead>
-                              <TableHead>Culturas</TableHead>
-                              <TableHead>Área Plantada</TableHead>
+                              <TableHead className="w-1/3 max-w-[300px]">Safra</TableHead>
+                              <TableHead className="w-1/3 max-w-[300px]">Culturas</TableHead>
+                              <TableHead className="w-1/3 max-w-[300px]">Área Plantada</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {farm.harvests?.length && farm.harvests?.length > 0 ? (
                               farm.harvests?.map(season => (
                                 <TableRow key={season.id}>
-                                  <TableCell>{season.year}</TableCell>
-                                  <TableCell>{season.crops.map(crop => crop.name).join(", ") || "Sem culturas"}</TableCell>
-                                  <TableCell>{season.crops.length > 0 ? farm.agriculturalArea : "0"}</TableCell>
+                                  <TableCell className="w-1/3 max-w-[300px] truncate">{season.year}</TableCell>
+                                  <TableCell className="w-1/3 max-w-[300px] truncate">{season.crops.map(crop => crop.name).join(", ") || "Sem culturas"}</TableCell>
+                                  <TableCell className="w-1/3 max-w-[300px] truncate">{season.crops.length > 0 ? farm.agriculturalArea : "0"}</TableCell>
                                 </TableRow>
                               ))
                             ) : (
