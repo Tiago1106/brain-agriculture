@@ -1,7 +1,7 @@
-import { Producer } from "@/stores/useProducerStore"
 import { z } from "zod"
-
 import { cpf, cnpj } from "cpf-cnpj-validator"
+
+import { Producer } from "@/types/producer"
 
 export const schemaFarm = z.object({
   name: z.string().min(3, "Nome da fazenda obrigatório"),
